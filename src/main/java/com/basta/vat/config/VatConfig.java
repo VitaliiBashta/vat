@@ -15,6 +15,12 @@ public class VatConfig {
     @Value("${remote.vat.source.url}")
     private String remoteSourceUrl;
 
+    @Value("${vat.top.count}")
+    private int topCount;
+
+    @Value("${vat.bottom.count}")
+    private int bottomCount;
+
     @Bean
     public ObjectMapper mapper() {
         return new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -32,4 +38,12 @@ public class VatConfig {
         return new VatLoader(client, remoteSourceUrl);
     }
 
+
+    public int getTopCount() {
+        return topCount;
+    }
+
+    public int getBottomCount() {
+        return bottomCount;
+    }
 }

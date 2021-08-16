@@ -1,5 +1,6 @@
 package com.basta.vat.controller;
 
+import com.basta.vat.config.VatConfig;
 import com.basta.vat.model.CountryVat;
 import com.basta.vat.service.Converter;
 import com.basta.vat.service.Evaluator;
@@ -16,26 +17,30 @@ import java.util.Set;
 @RequestMapping("/vat")
 public class VatController {
 
-    private static final int TOPS_COUNT = 2;
-    private final VatLoader vatLoader;
-    private final Converter converter;
-    private final Evaluator evaluator;
+  private final VatLoader vatLoader;
+  private final Converter converter;
+  private final Evaluator evaluator;
+  private final VatConfig vatConfig;
 
-    public VatController(VatLoader vatLoader, Converter converter, Evaluator evaluator) {
-        this.vatLoader = vatLoader;
-        this.converter = converter;
-        this.evaluator = evaluator;
-    }
+  public VatController(VatLoader vatLoader, Converter converter, Evaluator evaluator, VatConfig vatConfig) {
+    this.vatLoader = vatLoader;
+    this.converter = converter;
+    this.evaluator = evaluator;
+    this.vatConfig = vatConfig;
+  }
 
-    @GetMapping("/")
-    public Map<String, Map<Integer, List<String>>> calculateVat() {
+  @GetMapping("/")
+  public Map<String, List<String>> calculateVat() {
 
-        String vatsJson = vatLoader.loadVats();
-        Set<CountryVat> countryVats = converter.parseCountriesVat(vatsJson);
-        Map<Integer, List<String>> maxVats = evaluator.maxVat(countryVats, TOPS_COUNT);
-        Map<Integer, List<String>> minVats = evaluator.minVat(countryVats, TOPS_COUNT);
+    String vatsJson = vatLoader.loadVats();
+    Set<CountryVat> countryVats = converter.parseCountriesVat(vatsJson);
+    List<String> maxVats = evaluator.maxVat(countryVats, vatConfig.getTopCount());
+    List<String> minVats = evaluator.minVat(countryVats, vatConfig.getBottomCount());
 
-        return Map.of("HighestVAt", maxVats,
-                "LowestVat", minVats);
-    }
+    return Map.of(
+        "Countries with highest standard VAT",
+        maxVats,
+        "Countries with smallest standard VAT",
+        minVats);
+  }
 }
